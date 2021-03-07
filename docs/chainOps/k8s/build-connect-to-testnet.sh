@@ -58,3 +58,6 @@ sifnodecli keys show ${my_moniker} --keyring-backend file
 
 echo "9. Deploy a new node to your cluster and connect to an existing network:"
 rake "cluster:sifnode:deploy:peer[${my_cluster},${my_chain_id},${my_provider},${my_namespace},${my_image},${my_image_tag},${my_moniker},${my_mnemonic_data},${my_peer_address},${my_genesis_url}]"
+
+echo "10. Once deployed, check the status of the pods:"
+watch kubectl get pods -n ${my_namespace} --kubeconfig ./.live/sifchain-aws-${my_cluster}/kubeconfig_sifchain-aws-${my_cluster}"
