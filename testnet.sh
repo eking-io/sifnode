@@ -38,7 +38,7 @@ echo "  genesis_url  = ${theSifGenesisUrl}"
 echo ""
 
 while true; do
-    read -p "Are you good with all these parameters? " yn
+    read -p "Are you good with all these parameters? y|n " yn
     case $yn in
         [Yy]* ) echo "Cool! Will continue"; break;;
         [Nn]* ) exit;;
@@ -47,18 +47,18 @@ while true; do
 done
 
 echo "Creating Teraform Scaffold scripts for ${myCluster}"
-rake "cluster:scaffold[${myCluster},aws]"
+rake "cluster:scaffold[${myCluster},${myProvider}]"
 echo "Teraform script completed and saved in sifnode/.live directory"
 
-echo "Rake-Deploying cluster:${myCluster} to aws eks. This will take a while"
+echo "Rake-Deploying cluster:${myCluster} to ${myProvider} eks. This will take a while"
 time rake "cluster:deploy[${myCluster},${myProvider}]"
 echo "Rake-Deploying completed"
 sleep 10
 echo "Checking pods are deployed"
-kubectl get pods --all-namespaces --kubeconfig ./.live/sifchain-aws-${myCluster}/kubeconfig_sifchain-aws-${myCluster}
+kubectl get pods --all-namespaces --kubeconfig ${PWD}/.live/sifchain-aws-${myCluster}/kubeconfig_sifchain-aws-${myCluster}
 
 while true; do
-    read -p "Is the the get-pods result acceptable?" yn
+    read -p "Is the the get-pods result acceptable? y|n " yn
     case $yn in
         [Yy]* ) echo "Cool! Will continue"; break;;
         [Nn]* ) exit;;
@@ -95,7 +95,7 @@ echo "myPublicKey is: ${myPublicKey}"
 
 
 while true; do
-    read -p "Ready to STAKE! Did you get Rowans from the faucet yet? " yn
+    read -p "Ready to STAKE! Did you get Rowans from the faucet yet? y|n " yn
     case $yn in
         [Yy]* ) echo "Cool! Will continue"; break;;
         [Nn]* ) exit;;
@@ -109,6 +109,9 @@ rake "validator:stake[${theSifChainID},${myMoniker},10000000rowan,0.5rowan,${myP
 
 echo "Use this command to check if we are in the validator network"
 sifnodecli q tendermint-validator-set --node tcp://rpc-merry-go-round.sifchain.finance:80 --trust-node
+
+echo "alias .kctl=kubectl --namespace --kubeconfig ${PWD}/.live/sifchain-aws-${myCluster}/kubeconfig_sifchain-aws-${myCluster}" >> ~/.bashrc
+
 
 
 #sifnodecli q staking validators  --node tcp://rpc-merry-go-round.sifchain.finance:80  --output json | jq -r '.[] | select(.status==2)' | grep moniker | wc -l
